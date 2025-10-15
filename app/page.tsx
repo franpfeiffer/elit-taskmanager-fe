@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { DndContext, closestCenter, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core"
 import { UseTasks } from "@/hooks/UseTasks"
 import { TaskColumn } from "@/components/TaskColumn"
 import { NewTaskDialog } from "@/components/NewTaskDialog"
 import { TaskEditModal } from "@/components/TaskEditModal"
+import { TaskCard } from "@/components/TaskCard"
 import type { Task, TaskStatus } from "@/lib/types"
 import { Loader2 } from "lucide-react"
 
@@ -17,6 +19,7 @@ const columns: Array<{ id: TaskStatus; title: string }> = [
 export default function Home() {
     const { isLoading, error, addTask, updateTask, updateTaskStatus, deleteTask, getTasksByStatus } = UseTasks()
     const [editingTask, setEditingTask] = useState<Task | null>(null)
+    const [activeTask, setActiveTask] = useState<Task | null>(null)
 
     const handleEdit = (task: Task) => {
         setEditingTask(task)
@@ -28,6 +31,27 @@ export default function Home() {
 
     const handleCloseEdit = () => {
         setEditingTask(null)
+    }
+
+    const handleDragStart = (event: DragStartEvent) => {
+        const taskId = event.active.id as string
+        const allTasks = [...getTasksByStatus("PENDING"), ...getTasksByStatus("IN_PROGRESS"), ...getTasksByStatus("COMPLETED")]
+        const task = allTasks.find(t => t.id === taskId)
+        setActiveTask(task || null)
+    }
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event
+        setActiveTask(null)
+
+        if (!over) return
+
+        const taskId = active.id as string
+        const newStatus = over.id as TaskStatus
+
+        if (columns.some(col => col.id === newStatus)) {
+            updateTaskStatus(taskId, newStatus)
+        }
     }
 
     if (isLoading) {
@@ -53,41 +77,60 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-                <div className="container mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-foreground text-balance">Gestor de Tareas</h1>
-                            <p className="text-muted-foreground mt-1">Organiza y gestiona tus tareas de manera eficiente</p>
+        <DndContext
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="min-h-screen bg-background">
+                <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+                    <div className="container mx-auto px-4 py-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground text-balance">Gestor de Tareas</h1>
+                                <p className="text-muted-foreground mt-1">Organiza y gestiona tus tareas de manera eficiente</p>
+                            </div>
+                            <NewTaskDialog onCreateTask={addTask} />
                         </div>
-                        <NewTaskDialog onCreateTask={addTask} />
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <main className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-                    {columns.map((column) => (
-                        <TaskColumn
-                            key={column.id}
-                            title={column.title}
-                            status={column.id}
-                            tasks={getTasksByStatus(column.id)}
-                            onStatusChange={updateTaskStatus}
-                            onEdit={handleEdit}
-                            onDelete={deleteTask}
-                        />
-                    ))}
-                </div>
-            </main>
+                <main className="container mx-auto px-4 py-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+                        {columns.map((column) => (
+                            <TaskColumn
+                                key={column.id}
+                                title={column.title}
+                                status={column.id}
+                                tasks={getTasksByStatus(column.id)}
+                                onStatusChange={updateTaskStatus}
+                                onEdit={handleEdit}
+                                onDelete={deleteTask}
+                            />
+                        ))}
+                    </div>
+                </main>
 
-            <TaskEditModal
-                task={editingTask}
-                isOpen={!!editingTask}
-                onClose={handleCloseEdit}
-                onSave={handleSaveEdit}
-            />
-        </div>
+                <DragOverlay>
+                    {activeTask ? (
+                        <div className="rotate-3 opacity-90">
+                            <TaskCard
+                                task={activeTask}
+                                onStatusChange={() => {}}
+                                onEdit={() => {}}
+                                onDelete={() => {}}
+                            />
+                        </div>
+                    ) : null}
+                </DragOverlay>
+
+                <TaskEditModal
+                    task={editingTask}
+                    isOpen={!!editingTask}
+                    onClose={handleCloseEdit}
+                    onSave={handleSaveEdit}
+                />
+            </div>
+        </DndContext>
     )
 }

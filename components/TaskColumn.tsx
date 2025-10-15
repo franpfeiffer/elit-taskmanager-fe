@@ -1,5 +1,6 @@
 "use client"
 
+import { useDroppable } from "@dnd-kit/core"
 import type { Task, TaskStatus } from "@/lib/types"
 import { TaskCard } from "./TaskCard"
 
@@ -19,6 +20,10 @@ const statusColors: Record<TaskStatus, string> = {
 }
 
 export function TaskColumn({ title, status, tasks, onStatusChange, onEdit, onDelete }: TaskColumnProps) {
+    const { isOver, setNodeRef } = useDroppable({
+        id: status,
+    })
+
     return (
         <div className="flex flex-col h-full">
             <div className="mb-4">
@@ -31,10 +36,17 @@ export function TaskColumn({ title, status, tasks, onStatusChange, onEdit, onDel
                 <div className={`h-1 rounded-full ${statusColors[status]}`} />
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto">
+            <div
+                ref={setNodeRef}
+                className={`flex-1 space-y-3 overflow-y-auto p-2 rounded-lg transition-colors ${
+isOver ? "bg-accent/20 border-2 border-dashed border-primary" : "border-2 border-transparent"
+}`}
+            >
                 {tasks.length === 0 ? (
                     <div className="flex items-center justify-center h-32 border-2 border-dashed border-border rounded-lg">
-                        <p className="text-sm text-muted-foreground">No hay tareas</p>
+                        <p className="text-sm text-muted-foreground">
+                            {isOver ? "Suelta aquí" : "No hay tareas"}
+                        </p>
                     </div>
                 ) : (
                         tasks.map((task) => (
@@ -44,6 +56,7 @@ export function TaskColumn({ title, status, tasks, onStatusChange, onEdit, onDel
                                 onStatusChange={onStatusChange}
                                 onEdit={onEdit}
                                 onDelete={onDelete}
+                                isDraggable={true}
                             />
                         ))
                     )}

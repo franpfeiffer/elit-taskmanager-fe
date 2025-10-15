@@ -1,14 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { useDraggable } from "@dnd-kit/core"
+import { CSS } from "@dnd-kit/utilities"
 import type { Task, TaskStatus } from "@/lib/types"
-import { MoreVertical, Trash2, ArrowRight, ArrowLeft, Edit } from "lucide-react"
+import { MoreVertical, Trash2, ArrowRight, ArrowLeft, Edit, GripVertical } from "lucide-react"
 
 interface TaskCardProps {
     task: Task
     onStatusChange: (id: string, status: TaskStatus) => void
     onEdit: (task: Task) => void
     onDelete: (id: string) => void
+    isDraggable?: boolean
 }
 
 const statusConfig: Record<TaskStatus, { next?: TaskStatus; prev?: TaskStatus; label: string }> = {
@@ -17,18 +20,51 @@ const statusConfig: Record<TaskStatus, { next?: TaskStatus; prev?: TaskStatus; l
     COMPLETED: { prev: "IN_PROGRESS", label: "Completada" },
 }
 
-export function TaskCard({ task, onStatusChange, onEdit, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onStatusChange, onEdit, onDelete, isDraggable = true }: TaskCardProps) {
     const [menuOpen, setMenuOpen] = useState(false)
     const config = statusConfig[task.status]
 
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        isDragging,
+    } = useDraggable({
+        id: task.id,
+        disabled: !isDraggable,
+    })
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+    }
+
     return (
-        <div className="relative p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow">
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`relative p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow ${
+                isDragging ? "opacity-50 rotate-3 shadow-lg" : ""
+                }`}
+        >
             <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-card-foreground text-balance leading-snug mb-1">{task.title}</h3>
-                    {task.description && (
-                        <p className="text-sm text-muted-foreground text-pretty leading-relaxed">{task.description}</p>
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                    {isDraggable && (
+                        <button
+                            {...attributes}
+                            {...listeners}
+                            className="h-8 w-8 shrink-0 rounded-md hover:bg-accent transition-colors inline-flex items-center justify-center cursor-grab active:cursor-grabbing mt-0.5"
+                        >
+                            <GripVertical className="h-4 w-4 text-muted-foreground" />
+                        </button>
                     )}
+
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-card-foreground text-balance leading-snug mb-1">{task.title}</h3>
+                        {task.description && (
+                            <p className="text-sm text-muted-foreground text-pretty leading-relaxed">{task.description}</p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="relative">
