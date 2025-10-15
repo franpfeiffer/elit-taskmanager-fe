@@ -1,13 +1,14 @@
 "use client"
 
 import type { Task, TaskStatus } from "@/lib/types"
-import { TaskCard } from "./task-card"
+import { TaskCard } from "./TaskCard"
 
 interface TaskColumnProps {
     title: string
     status: TaskStatus
     tasks: Task[]
     onStatusChange: (id: string, status: TaskStatus) => void
+    onEdit: (task: Task) => void
     onDelete: (id: string) => void
 }
 
@@ -17,7 +18,7 @@ const statusColors: Record<TaskStatus, string> = {
     COMPLETED: "bg-primary/10",
 }
 
-export function TaskColumn({ title, status, tasks, onStatusChange, onDelete }: TaskColumnProps) {
+export function TaskColumn({ title, status, tasks, onStatusChange, onEdit, onDelete }: TaskColumnProps) {
     return (
         <div className="flex flex-col h-full">
             <div className="mb-4">
@@ -37,11 +38,16 @@ export function TaskColumn({ title, status, tasks, onStatusChange, onDelete }: T
                     </div>
                 ) : (
                         tasks.map((task) => (
-                            <TaskCard key={task.id} task={task} onStatusChange={onStatusChange} onDelete={onDelete} />
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                onStatusChange={onStatusChange}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                            />
                         ))
                     )}
             </div>
         </div>
     )
 }
-

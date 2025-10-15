@@ -50,8 +50,8 @@ export function NewTaskDialog({ onCreateTask }: NewTaskDialogProps) {
             </button>
 
             {open && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 min-h-screen">
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]" onClick={() => !isSubmitting && setOpen(false)} />
+                <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 min-h-screen">
+                    <div className="fixed inset-0 z-[9998]" onClick={() => !isSubmitting && setOpen(false)} />
                     <div className="relative z-[10000] w-full max-w-lg bg-background rounded-lg shadow-lg border border-border">
                         <form onSubmit={handleSubmit}>
                             <div className="flex items-center justify-between p-6 border-b border-border">

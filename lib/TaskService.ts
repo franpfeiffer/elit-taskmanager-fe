@@ -3,7 +3,7 @@ import type { Task } from './types';
 
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
-export const taskService = {
+export const TaskService = {
     async getTasks(): Promise<Task[]> {
         return await taskApi.getAll();
     },
@@ -14,6 +14,10 @@ export const taskService = {
             description: task.description,
             status: task.status || 'PENDING',
         });
+    },
+
+    async updateTask(id: string, updates: { title?: string; description?: string; status?: TaskStatus }): Promise<Task> {
+        return await taskApi.update(id, updates);
     },
 
     async updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {

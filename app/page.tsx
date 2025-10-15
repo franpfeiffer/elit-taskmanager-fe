@@ -1,9 +1,11 @@
 "use client"
 
-import { useTasks } from "@/hooks/use-tasks"
-import { TaskColumn } from "@/components/task-column"
-import { NewTaskDialog } from "@/components/new-task-dialog"
-import type { TaskStatus } from "@/lib/types"
+import { useState } from "react"
+import { UseTasks } from "@/hooks/UseTasks"
+import { TaskColumn } from "@/components/TaskColumn"
+import { NewTaskDialog } from "@/components/NewTaskDialog"
+import { TaskEditModal } from "@/components/TaskEditModal"
+import type { Task, TaskStatus } from "@/lib/types"
 import { Loader2 } from "lucide-react"
 
 const columns: Array<{ id: TaskStatus; title: string }> = [
@@ -13,7 +15,20 @@ const columns: Array<{ id: TaskStatus; title: string }> = [
 ]
 
 export default function Home() {
-    const { isLoading, error, addTask, updateTaskStatus, deleteTask, getTasksByStatus } = useTasks()
+    const { isLoading, error, addTask, updateTask, updateTaskStatus, deleteTask, getTasksByStatus } = UseTasks()
+    const [editingTask, setEditingTask] = useState<Task | null>(null)
+
+    const handleEdit = (task: Task) => {
+        setEditingTask(task)
+    }
+
+    const handleSaveEdit = async (id: string, updates: { title: string; description?: string; status: TaskStatus }) => {
+        await updateTask(id, updates)
+    }
+
+    const handleCloseEdit = () => {
+        setEditingTask(null)
+    }
 
     if (isLoading) {
         return (
@@ -60,11 +75,19 @@ export default function Home() {
                             status={column.id}
                             tasks={getTasksByStatus(column.id)}
                             onStatusChange={updateTaskStatus}
+                            onEdit={handleEdit}
                             onDelete={deleteTask}
                         />
                     ))}
                 </div>
             </main>
+
+            <TaskEditModal
+                task={editingTask}
+                isOpen={!!editingTask}
+                onClose={handleCloseEdit}
+                onSave={handleSaveEdit}
+            />
         </div>
     )
 }

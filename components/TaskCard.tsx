@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import type { Task, TaskStatus } from "@/lib/types"
-import { MoreVertical, Trash2, ArrowRight, ArrowLeft } from "lucide-react"
+import { MoreVertical, Trash2, ArrowRight, ArrowLeft, Edit } from "lucide-react"
 
 interface TaskCardProps {
     task: Task
     onStatusChange: (id: string, status: TaskStatus) => void
+    onEdit: (task: Task) => void
     onDelete: (id: string) => void
 }
 
@@ -16,7 +17,7 @@ const statusConfig: Record<TaskStatus, { next?: TaskStatus; prev?: TaskStatus; l
     COMPLETED: { prev: "IN_PROGRESS", label: "Completada" },
 }
 
-export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onStatusChange, onEdit, onDelete }: TaskCardProps) {
     const [menuOpen, setMenuOpen] = useState(false)
     const config = statusConfig[task.status]
 
@@ -44,6 +45,16 @@ export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
                             <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                             <div className="absolute right-0 top-10 z-20 w-56 rounded-md border border-border bg-popover shadow-lg">
                                 <div className="p-1">
+                                    <button
+                                        onClick={() => {
+                                            onEdit(task)
+                                            setMenuOpen(false)
+                                        }}
+                                        className="w-full flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors text-left"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                        Editar
+                                    </button>
                                     {config.prev && (
                                         <button
                                             onClick={() => {
@@ -87,4 +98,3 @@ export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
         </div>
     )
 }
-
