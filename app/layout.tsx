@@ -7,7 +7,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-    title: "Elit TaskManager - Desafío Full Stack",
+    title: "Elit Task Manager - Desafío Full Stack",
     description: "Aplicación de gestión de tareas con tablero Kanban",
     icons: {
         icon: "/elit-logo.svg",
@@ -20,7 +20,7 @@ export default function RootLayout({
         children: React.ReactNode
     }>) {
     return (
-        <html lang="es">
+        <html lang="es" className="dark">
             <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
                 <Suspense fallback={null}>{children}</Suspense>
                 <Analytics />
