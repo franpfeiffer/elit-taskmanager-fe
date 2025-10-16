@@ -43,10 +43,11 @@ export function NewTaskDialog({ onCreateTask }: NewTaskDialogProps) {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 rounded-full md:rounded-lg bg-primary p-3 md:px-6 md:py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                aria-label="Nueva Tarea"
             >
                 <Plus className="h-5 w-5" />
-                Nueva Tarea
+                <span className="hidden md:inline">Nueva Tarea</span>
             </button>
 
             {open && (

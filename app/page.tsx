@@ -40,7 +40,7 @@ export default function Home() {
         setActiveTask(task || null)
     }
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
         setActiveTask(null)
 
@@ -50,7 +50,11 @@ export default function Home() {
         const newStatus = over.id as TaskStatus
 
         if (columns.some(col => col.id === newStatus)) {
-            updateTaskStatus(taskId, newStatus)
+            try {
+                await updateTaskStatus(taskId, newStatus)
+            } catch (error) {
+                console.error('Error updating task status:', error)
+            }
         }
     }
 
@@ -84,19 +88,19 @@ export default function Home() {
         >
             <div className="min-h-screen bg-background">
                 <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-                    <div className="container mx-auto px-4 py-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold text-foreground text-balance">Gestor de Tareas</h1>
-                                <p className="text-muted-foreground mt-1">Organiza y gestiona tus tareas de manera eficiente</p>
+                    <div className="container mx-auto px-4 py-4 md:py-6">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                                <h1 className="text-2xl md:text-3xl font-bold text-foreground text-balance">Gestor de Tareas</h1>
+                                <p className="text-sm md:text-base text-muted-foreground mt-1 hidden sm:block">Organiza y gestiona tus tareas de manera eficiente</p>
                             </div>
                             <NewTaskDialog onCreateTask={addTask} />
                         </div>
                     </div>
                 </header>
 
-                <main className="container mx-auto px-4 py-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+                <main className="container mx-auto px-4 py-6 md:py-8 pb-20 md:pb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[calc(100vh-250px)] md:h-[calc(100vh-200px)]">
                         {columns.map((column) => (
                             <TaskColumn
                                 key={column.id}

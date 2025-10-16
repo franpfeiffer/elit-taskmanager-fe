@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDraggable } from "@dnd-kit/core"
 import { CSS } from "@dnd-kit/utilities"
 import type { Task, TaskStatus } from "@/lib/types"
-import { MoreVertical, Trash2, ArrowRight, ArrowLeft, Edit, GripVertical } from "lucide-react"
+import { MoreVertical, Trash2, ArrowRight, ArrowLeft, Edit, GripVertical, X } from "lucide-react"
 
 interface TaskCardProps {
     task: Task
@@ -22,6 +22,7 @@ const statusConfig: Record<TaskStatus, { next?: TaskStatus; prev?: TaskStatus; l
 
 export function TaskCard({ task, onStatusChange, onEdit, onDelete, isDraggable = true }: TaskCardProps) {
     const [menuOpen, setMenuOpen] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
     const config = statusConfig[task.status]
 
     const {
@@ -39,13 +40,33 @@ export function TaskCard({ task, onStatusChange, onEdit, onDelete, isDraggable =
         transform: CSS.Translate.toString(transform),
     }
 
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
+    useEffect(() => {
+        if (menuOpen && isMobile) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => {
+            document.body.style.overflow = ''
+        }
+    }, [menuOpen, isMobile])
+
     return (
         <div
             ref={setNodeRef}
             style={style}
             className={`relative p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow ${
                 isDragging ? "opacity-50 rotate-3 shadow-lg" : ""
-                }`}
+            }`}
         >
             <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -76,7 +97,7 @@ export function TaskCard({ task, onStatusChange, onEdit, onDelete, isDraggable =
                         <span className="sr-only">Opciones de tarea</span>
                     </button>
 
-                    {menuOpen && (
+                    {menuOpen && !isMobile && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                             <div className="absolute right-0 top-10 z-20 w-56 rounded-md border border-border bg-popover shadow-lg">
@@ -131,6 +152,71 @@ export function TaskCard({ task, onStatusChange, onEdit, onDelete, isDraggable =
                     )}
                 </div>
             </div>
+
+            {menuOpen && isMobile && (
+                <div className="fixed inset-0 z-[100] flex items-end">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
+                    <div className="relative z-[101] w-full bg-popover rounded-t-2xl shadow-xl animate-in slide-in-from-bottom duration-200">
+                        <div className="flex items-center justify-between p-4 border-b border-border">
+                            <h3 className="font-semibold text-base">Opciones de tarea</h3>
+                            <button
+                                onClick={() => setMenuOpen(false)}
+                                className="h-8 w-8 rounded-md hover:bg-accent transition-colors inline-flex items-center justify-center"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="p-2 pb-safe">
+                            <button
+                                onClick={() => {
+                                    onEdit(task)
+                                    setMenuOpen(false)
+                                }}
+                                className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
+                            >
+                                <Edit className="h-5 w-5" />
+                                <span className="text-base">Editar tarea</span>
+                            </button>
+                            {config.prev && (
+                                <button
+                                    onClick={() => {
+                                        onStatusChange(task.id, config.prev!)
+                                        setMenuOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
+                                >
+                                    <ArrowLeft className="h-5 w-5" />
+                                    <span className="text-base">Mover a {statusConfig[config.prev].label}</span>
+                                </button>
+                            )}
+                            {config.next && (
+                                <button
+                                    onClick={() => {
+                                        onStatusChange(task.id, config.next!)
+                                        setMenuOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-foreground hover:bg-accent transition-colors"
+                                >
+                                    <ArrowRight className="h-5 w-5" />
+                                    <span className="text-base">Mover a {statusConfig[config.next].label}</span>
+                                </button>
+                            )}
+                            <div className="border-t border-border mt-2 pt-2">
+                                <button
+                                    onClick={() => {
+                                        onDelete(task.id)
+                                        setMenuOpen(false)
+                                    }}
+                                    className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-left text-destructive hover:bg-destructive/10 transition-colors"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                    <span className="text-base">Eliminar tarea</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

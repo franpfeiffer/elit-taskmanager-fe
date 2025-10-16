@@ -50,26 +50,42 @@ export function UseTasks() {
     }, [])
 
     const updateTaskStatus = useCallback(async (id: string, status: TaskStatus) => {
+        const previousTasks = tasks
+        const taskToUpdate = tasks.find(t => t.id === id)
+
+        if (!taskToUpdate) {
+            console.error('Task not found:', id)
+            return
+        }
+
+        const optimisticTask = { ...taskToUpdate, status }
+        setTasks((prev) => prev.map((task) => (task.id === id ? optimisticTask : task)))
+
         try {
             const updatedTask = await TaskService.updateTaskStatus(id, status)
             setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)))
             return updatedTask
         } catch (err) {
-            console.error('Error updating task:', err)
+            console.error('Error updating task status, reverting:', err)
+            setTasks(previousTasks)
             throw err
         }
-    }, [])
+    }, [tasks])
 
     const deleteTask = useCallback(async (id: string) => {
+        const previousTasks = tasks
+
+        setTasks((prev) => prev.filter((task) => task.id !== id))
+
         try {
             await TaskService.deleteTask(id)
-            setTasks((prev) => prev.filter((task) => task.id !== id))
             return true
         } catch (err) {
-            console.error('Error deleting task:', err)
+            console.error('Error deleting task, reverting:', err)
+            setTasks(previousTasks)
             throw err
         }
-    }, [])
+    }, [tasks])
 
     const getTasksByStatus = useCallback(
         (status: TaskStatus) => {
