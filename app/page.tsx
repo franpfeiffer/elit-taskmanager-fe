@@ -7,6 +7,7 @@ import { TaskColumn } from "@/components/TaskColumn"
 import { NewTaskDialog } from "@/components/NewTaskDialog"
 import { TaskEditModal } from "@/components/TaskEditModal"
 import { TaskCard } from "@/components/TaskCard"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import type { Task, TaskStatus } from "@/lib/types"
 import { Loader2 } from "lucide-react"
 
@@ -94,7 +95,10 @@ export default function Home() {
                                 <h1 className="text-2xl md:text-3xl font-bold text-foreground text-balance">Gestor de Tareas</h1>
                                 <p className="text-sm md:text-base text-muted-foreground mt-1 hidden sm:block">Organiza y gestiona tus tareas de manera eficiente</p>
                             </div>
-                            <NewTaskDialog onCreateTask={addTask} />
+                            <div className="flex items-center gap-3">
+                                <ThemeToggle />
+                                <NewTaskDialog onCreateTask={addTask} />
+                            </div>
                         </div>
                     </div>
                 </header>
