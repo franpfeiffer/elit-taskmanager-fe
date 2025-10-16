@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DndContext, closestCenter, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core"
-import { UseTasks } from "@/hooks/UseTasks"
+import { useTaskStore } from "@/lib/store/TaskStore"
 import { TaskColumn } from "@/components/TaskColumn"
 import { NewTaskDialog } from "@/components/NewTaskDialog"
 import { TaskEditModal } from "@/components/TaskEditModal"
@@ -18,9 +18,23 @@ const columns: Array<{ id: TaskStatus; title: string }> = [
 ]
 
 export default function Home() {
-    const { isLoading, error, addTask, updateTask, updateTaskStatus, deleteTask, getTasksByStatus } = UseTasks()
+    const {
+        isLoading,
+        error,
+        loadTasks,
+        addTask,
+        updateTask,
+        updateTaskStatus,
+        deleteTask,
+        getTasksByStatus
+    } = useTaskStore()
+
     const [editingTask, setEditingTask] = useState<Task | null>(null)
     const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+    useEffect(() => {
+        loadTasks()
+    }, [loadTasks])
 
     const handleEdit = (task: Task) => {
         setEditingTask(task)
@@ -72,7 +86,7 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center min-h-screen gap-4">
                 <p className="text-destructive text-lg">{error}</p>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => loadTasks()}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                 >
                     Reintentar
