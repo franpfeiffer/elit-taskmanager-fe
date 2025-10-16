@@ -7,22 +7,25 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Elit TaskManager - Desafío Full Stack",
-  description: "Aplicación de gestión de tareas con tablero Kanban",
+    title: "Elit TaskManager - Desafío Full Stack",
+    description: "Aplicación de gestión de tareas con tablero Kanban",
+    icons: {
+        icon: "/elit-logo.svg",
+    }
 }
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang="es">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <Suspense fallback={null}>{children}</Suspense>
-        <Analytics />
-      </body>
-    </html>
-  )
+        children: React.ReactNode
+    }>) {
+    return (
+        <html lang="es">
+            <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+                <Suspense fallback={null}>{children}</Suspense>
+                <Analytics />
+            </body>
+        </html>
+    )
 }
 
